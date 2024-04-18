@@ -2,18 +2,39 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+# 
 
-    def __repr__(self):
-        return '<User %r>' % self.username
+# En la programacion se suelen llamar las cosas en ingles
+class Language(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    # EN | ES | JP | FR
+    name = db.Column(db.String(10), unique=True, nullable=False)
+    
+    # Plural
+    words = db.relationship('Word', backref="language")
+    
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
+
+# Uno -> Muchos
+# Un lenguaje puede tener muchas palabras
+
+class Word(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    word = db.Column(db.String(120), unique=True, nullable=False)
+    definition = db.Column(db.String(120), unique=False, nullable=False)
+
+    # Si o si tiene que pertenecer a un lenguaje
+    language_id = db.Column(db.Integer, db.ForeignKey('language.id'), nullable=False)
+
 
     def serialize(self):
         return {
             "id": self.id,
-            "email": self.email,
-            # do not serialize the password, its a security breach
+            "word": self.word,
+            "definition": self.definition
         }
